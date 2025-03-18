@@ -188,6 +188,12 @@ resource "argocd_application" "kubeflow-configs" {
       target_revision = var.target_revision
     }
 
+    ignore_difference {
+      group         = "rbac.authorization.k8s.io/v1"
+      kind          = "ClusterRole"
+      json_pointers = ["/rules"]
+    }
+
     destination {
       name      = var.destination_cluster
       namespace = var.namespace
