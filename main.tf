@@ -103,6 +103,6 @@ resource "argocd_application" "oauth2-proxy" {
 
 resource "null_resource" "this" {
   depends_on = [
-    resource.argocd_application.this,
+    resource.argocd_application.oauth2-proxy,
   ]
 }
