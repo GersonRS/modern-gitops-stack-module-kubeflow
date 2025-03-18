@@ -323,6 +323,20 @@ resource "argocd_application" "admission-webhook" {
       namespace = var.namespace
     }
 
+    ignore_difference {
+      group         = "admissionregistration.k8s.io"
+      kind          = "MutatingWebhookConfiguration"
+      json_pointers = ["/webhooks/0/clientConfig/caBundle"]
+    }
+
+    ignore_difference {
+      group = "rbac.authorization.k8s.io"
+      kind  = "ClusterRole"
+      jq_path_expressions = [
+        ".rules"
+      ]
+    }
+
     sync_policy {
       dynamic "automated" {
         for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
