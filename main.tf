@@ -189,7 +189,7 @@ resource "argocd_application" "kubeflow-configs" {
     }
 
     ignore_difference {
-      group         = "rbac.authorization.k8s.io/v1"
+      group         = "rbac.authorization.k8s.io"
       kind          = "ClusterRole"
       json_pointers = ["/rules"]
     }
