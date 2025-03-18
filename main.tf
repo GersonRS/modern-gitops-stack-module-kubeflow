@@ -223,66 +223,66 @@ resource "argocd_application" "kubeflow-configs" {
   ]
 }
 
-resource "argocd_application" "central-dashboard" {
-  metadata {
-    name      = var.destination_cluster != "in-cluster" ? "central-dashboard-${var.destination_cluster}" : "central-dashboard"
-    namespace = var.argocd_namespace
-    labels = merge({
-      "application" = "central-dashboard"
-      "cluster"     = var.destination_cluster
-    }, var.argocd_labels)
-  }
+# resource "argocd_application" "central-dashboard" {
+#   metadata {
+#     name      = var.destination_cluster != "in-cluster" ? "central-dashboard-${var.destination_cluster}" : "central-dashboard"
+#     namespace = var.argocd_namespace
+#     labels = merge({
+#       "application" = "central-dashboard"
+#       "cluster"     = var.destination_cluster
+#     }, var.argocd_labels)
+#   }
 
-  timeouts {
-    create = "15m"
-    delete = "15m"
-  }
+#   timeouts {
+#     create = "15m"
+#     delete = "15m"
+#   }
 
-  wait = var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? false : true
+#   wait = var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? false : true
 
-  spec {
-    project = var.argocd_project == null ? argocd_project.this[0].metadata.0.name : var.argocd_project
+#   spec {
+#     project = var.argocd_project == null ? argocd_project.this[0].metadata.0.name : var.argocd_project
 
-    source {
-      repo_url        = var.project_source_repo
-      path            = "charts/kubeflow/apps/central-dashboard"
-      target_revision = var.target_revision
-    }
+#     source {
+#       repo_url        = var.project_source_repo
+#       path            = "charts/kubeflow/apps/central-dashboard"
+#       target_revision = var.target_revision
+#     }
 
-    destination {
-      name      = var.destination_cluster
-      namespace = var.namespace
-    }
+#     destination {
+#       name      = var.destination_cluster
+#       namespace = var.namespace
+#     }
 
-    sync_policy {
-      dynamic "automated" {
-        for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
-        content {
-          prune       = automated.value.prune
-          self_heal   = automated.value.self_heal
-          allow_empty = automated.value.allow_empty
-        }
-      }
+#     sync_policy {
+#       dynamic "automated" {
+#         for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
+#         content {
+#           prune       = automated.value.prune
+#           self_heal   = automated.value.self_heal
+#           allow_empty = automated.value.allow_empty
+#         }
+#       }
 
-      retry {
-        backoff {
-          duration     = "20s"
-          max_duration = "2m"
-          factor       = "2"
-        }
-        limit = "5"
-      }
+#       retry {
+#         backoff {
+#           duration     = "20s"
+#           max_duration = "2m"
+#           factor       = "2"
+#         }
+#         limit = "5"
+#       }
 
-      sync_options = [
-        "CreateNamespace=true",
-      ]
-    }
-  }
+#       sync_options = [
+#         "CreateNamespace=true",
+#       ]
+#     }
+#   }
 
-  depends_on = [
-    resource.argocd_application.kubeflow-configs,
-  ]
-}
+#   depends_on = [
+#     resource.argocd_application.kubeflow-configs,
+#   ]
+# }
 
 resource "null_resource" "this" {
   depends_on = [
