@@ -398,6 +398,14 @@ resource "argocd_application" "jupyter" {
       namespace = var.namespace
     }
 
+    ignore_difference {
+      group = "rbac.authorization.k8s.io"
+      kind  = "ClusterRole"
+      jq_path_expressions = [
+        ".rules"
+      ]
+    }
+
     sync_policy {
       dynamic "automated" {
         for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
