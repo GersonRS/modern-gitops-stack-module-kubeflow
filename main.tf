@@ -436,6 +436,74 @@ resource "argocd_application" "jupyter" {
   ]
 }
 
+resource "argocd_application" "pvcviewer-controller" {
+  metadata {
+    name      = var.destination_cluster != "in-cluster" ? "pvcviewer-controller-${var.destination_cluster}" : "pvcviewer-controller"
+    namespace = var.argocd_namespace
+    labels = merge({
+      "application" = "pvcviewer-controller"
+      "cluster"     = var.destination_cluster
+    }, var.argocd_labels)
+  }
+
+  timeouts {
+    create = "15m"
+    delete = "15m"
+  }
+
+  wait = var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? false : true
+
+  spec {
+    project = var.argocd_project == null ? argocd_project.this[0].metadata.0.name : var.argocd_project
+
+    source {
+      repo_url        = var.project_source_repo
+      path            = "charts/kubeflow/apps/pvcviewer-controller"
+      target_revision = var.target_revision
+    }
+
+    destination {
+      name      = var.destination_cluster
+      namespace = var.namespace
+    }
+
+    ignore_difference {
+      group = "rbac.authorization.k8s.io"
+      kind  = "ClusterRole"
+      jq_path_expressions = [
+        ".rules"
+      ]
+    }
+
+    sync_policy {
+      dynamic "automated" {
+        for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
+        content {
+          prune       = automated.value.prune
+          self_heal   = automated.value.self_heal
+          allow_empty = automated.value.allow_empty
+        }
+      }
+
+      retry {
+        backoff {
+          duration     = "20s"
+          max_duration = "2m"
+          factor       = "2"
+        }
+        limit = "5"
+      }
+
+      sync_options = [
+        "CreateNamespace=true",
+      ]
+    }
+  }
+
+  depends_on = [
+    resource.argocd_application.jupyter,
+  ]
+}
 resource "argocd_application" "profiles" {
   metadata {
     name      = var.destination_cluster != "in-cluster" ? "profiles-${var.destination_cluster}" : "profiles"
