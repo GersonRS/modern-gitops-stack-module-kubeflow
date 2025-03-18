@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/GersonRS/modern-gitops-stack-module-kubeflow/compare/v2.5.0...v2.6.0) (2025-03-18)
+
+
+### 🚀 New Features
+
+* first commit ([d70c3f5](https://github.com/GersonRS/modern-gitops-stack-module-kubeflow/commit/d70c3f5dd17457cd3256402198084640c9d995d2))
+
 ## [2.5.0](https://github.com/GersonRS/modern-gitops-stack-module-kube-prometheus-stack/compare/v2.4.0...v2.5.0) (2024-05-01)
 
 
