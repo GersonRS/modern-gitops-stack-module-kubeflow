@@ -435,12 +435,13 @@ resource "argocd_application" "jupyter" {
     resource.argocd_application.admission-webhook,
   ]
 }
-resource "argocd_application" "pvcviewer-controller" {
+
+resource "argocd_application" "profiles" {
   metadata {
-    name      = var.destination_cluster != "in-cluster" ? "pvcviewer-controller-${var.destination_cluster}" : "pvcviewer-controller"
+    name      = var.destination_cluster != "in-cluster" ? "profiles-${var.destination_cluster}" : "profiles"
     namespace = var.argocd_namespace
     labels = merge({
-      "application" = "pvcviewer-controller"
+      "application" = "profiles"
       "cluster"     = var.destination_cluster
     }, var.argocd_labels)
   }
@@ -457,7 +458,7 @@ resource "argocd_application" "pvcviewer-controller" {
 
     source {
       repo_url        = var.project_source_repo
-      path            = "charts/kubeflow/apps/pvcviewer-controller"
+      path            = "charts/kubeflow/apps/profiles"
       target_revision = var.target_revision
     }
 
@@ -500,7 +501,7 @@ resource "argocd_application" "pvcviewer-controller" {
   }
 
   depends_on = [
-    resource.argocd_application.jupyter,
+    resource.argocd_application.pvcviewer-controller,
   ]
 }
 
@@ -513,5 +514,6 @@ resource "null_resource" "this" {
     resource.argocd_application.admission-webhook,
     resource.argocd_application.jupyter,
     resource.argocd_application.pvcviewer-controller,
+    resource.argocd_application.profiles,
   ]
 }
