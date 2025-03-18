@@ -189,11 +189,11 @@ resource "argocd_application" "kubeflow-configs" {
     }
 
     ignore_difference {
-      group               = "rbac.authorization.k8s.io"
-      kind                = "ClusterRole"
-      jq_path_expressions = <<-EOT
-          - .rules[] | select(.apiGroups == ["*"])
-        EOT
+      group = "rbac.authorization.k8s.io"
+      kind  = "ClusterRole"
+      jq_path_expressions = [
+        ".rules[] | select(.apiGroups == [\"*\"])"
+      ]
     }
 
     destination {
