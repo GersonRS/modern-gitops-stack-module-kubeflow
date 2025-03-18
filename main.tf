@@ -289,6 +289,6 @@ resource "null_resource" "this" {
     resource.argocd_application.oauth2-proxy,
     resource.argocd_application.dex,
     resource.argocd_application.kubeflow-configs,
-    resource.argocd_application.central-dashboard,
+    # resource.argocd_application.central-dashboard,
   ]
 }
