@@ -505,6 +505,75 @@ resource "argocd_application" "profiles" {
   ]
 }
 
+resource "argocd_application" "volumes-web-app" {
+  metadata {
+    name      = var.destination_cluster != "in-cluster" ? "volumes-web-app-${var.destination_cluster}" : "volumes-web-app"
+    namespace = var.argocd_namespace
+    labels = merge({
+      "application" = "volumes-web-app"
+      "cluster"     = var.destination_cluster
+    }, var.argocd_labels)
+  }
+
+  timeouts {
+    create = "15m"
+    delete = "15m"
+  }
+
+  wait = var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? false : true
+
+  spec {
+    project = var.argocd_project == null ? argocd_project.this[0].metadata.0.name : var.argocd_project
+
+    source {
+      repo_url        = var.project_source_repo
+      path            = "charts/kubeflow/apps/volumes-web-app"
+      target_revision = var.target_revision
+    }
+
+    destination {
+      name      = var.destination_cluster
+      namespace = var.namespace
+    }
+
+    ignore_difference {
+      group = "rbac.authorization.k8s.io"
+      kind  = "ClusterRole"
+      jq_path_expressions = [
+        ".rules"
+      ]
+    }
+
+    sync_policy {
+      dynamic "automated" {
+        for_each = toset(var.app_autosync == { "allow_empty" = tobool(null), "prune" = tobool(null), "self_heal" = tobool(null) } ? [] : [var.app_autosync])
+        content {
+          prune       = automated.value.prune
+          self_heal   = automated.value.self_heal
+          allow_empty = automated.value.allow_empty
+        }
+      }
+
+      retry {
+        backoff {
+          duration     = "20s"
+          max_duration = "2m"
+          factor       = "2"
+        }
+        limit = "5"
+      }
+
+      sync_options = [
+        "CreateNamespace=true",
+      ]
+    }
+  }
+
+  depends_on = [
+    resource.argocd_application.profiles,
+  ]
+}
+
 resource "null_resource" "this" {
   depends_on = [
     resource.argocd_application.oauth2-proxy,
@@ -515,5 +584,6 @@ resource "null_resource" "this" {
     resource.argocd_application.jupyter,
     resource.argocd_application.pvcviewer-controller,
     resource.argocd_application.profiles,
+    resource.argocd_application.volumes-web-app,
   ]
 }
