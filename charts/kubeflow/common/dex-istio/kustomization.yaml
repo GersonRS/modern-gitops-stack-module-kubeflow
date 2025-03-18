@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: auth
 
 resources:
-- github.com/kubeflow/manifests/common/dex/overlays/istio?ref=v1.9.1
+- github.com/kubeflow/manifests/common/dex/overlays/istio?ref=v1.10-branch
 
 patchesStrategicMerge:
 - configmap-patch.yaml
