@@ -192,7 +192,7 @@ resource "argocd_application" "kubeflow-configs" {
       group = "rbac.authorization.k8s.io"
       kind  = "ClusterRole"
       jq_path_expressions = [
-        ".rules[]"
+        ".rules"
       ]
     }
 
