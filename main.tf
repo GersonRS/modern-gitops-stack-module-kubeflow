@@ -664,7 +664,7 @@ resource "argocd_application" "user-namespace" {
 
     source {
       repo_url        = var.project_source_repo
-      path            = "charts/kubeflow/apps/user-namespace"
+      path            = "charts/kubeflow/common/user-namespace"
       target_revision = var.target_revision
     }
 
